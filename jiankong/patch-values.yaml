@@ -1,0 +1,10 @@
+grafana:
+  sidecar:
+    dashboards:
+    # 允许 sidecar 扫描 ConfigMap 导入面板（保持开启）
+      enabled: true
+      provider:
+    # 核心配置：允许在 Grafana UI 前端进行修改和保存
+        allowUiUpdates: true
+    # 可选：设置为 false 代表允许在前端删除这些自动导入的面板；保持 true 则只许改不许删
+        disableDeletion: false

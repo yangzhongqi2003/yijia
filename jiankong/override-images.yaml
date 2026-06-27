@@ -1,0 +1,39 @@
+
+prometheusOperator:
+  image:
+    registry: quay.io
+    repository: prometheus-operator/prometheus-operator
+
+prometheus:
+  prometheusSpec:
+    image:
+      registry: docker.io
+      repository: prom/prometheus
+
+alertmanager:
+  alertmanagerSpec:
+    image:
+      registry: docker.io
+      repository: prom/alertmanager
+
+nodeExporter:
+  image:
+    registry: docker.io
+    repository: prom/node-exporter
+
+grafana:
+  sidecar:
+    image:
+      registry: docker.io
+      repository: kiwigrid/k8s-sidecar
+
+kubeStateMetrics:
+  image:
+    registry: registry.k8s.io
+    repository: kube-state-metrics/kube-state-metrics
+
+prometheus-node-exporter:
+  daemonset:
+    tolerations:
+      - operator: Exists
+    

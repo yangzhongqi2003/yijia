@@ -1,0 +1,17 @@
+prometheus-node-exporter:
+  tolerations:
+    - operator: Exists
+
+prometheus:
+  prometheusSpec:
+    tolerations:
+      - operator: Exists
+
+alertmanager:
+  alertmanagerSpec:
+    tolerations:
+      - operator: Exists
+
+grafana:
+  tolerations:
+    - operator: Exists

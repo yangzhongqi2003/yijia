@@ -1,0 +1,12 @@
+grafana:
+  persistence:
+    enabled: true
+    type: pvc
+
+    storageClassName: ebs-sc
+
+    accessModes:
+      - ReadWriteOnce
+    size: 500Gi
+  initChownData:
+    enabled: true
