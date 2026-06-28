@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rocketmq-proxy-idn-tr-conf
+  namespace: test-acp
+  labels:
+    app: rocketmq-proxy-idn-tr
+    component: proxy
+data:
+  proxy.conf: |
+    {
+      "proxyMode": "cluster",
+      "namesrvAddr": "rocketmq-nameserver:9876",
+      "rocketmqClusterName": "rocketmq-broker-idn-tr",
+      "heartbeatSyncerType": "NONE"
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rocketmq-proxy-idn-tr
+  namespace: test-acp
+  labels:
+    app: rocketmq-proxy-idn-tr
+    component: proxy
+spec:
+  # 当前为单节点；后续如需多副本，可按需提高 replicas。
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rocketmq-proxy-idn-tr
+  template:
+    metadata:
+      labels:
+        app: rocketmq-proxy-idn-tr
+        component: proxy
+    spec:
+      securityContext:
+        runAsUser: 0
+      containers:
+        - name: proxy
+          image: apache/rocketmq:5.3.2
+          command:
+            - sh
+            - -c
+            - /home/rocketmq/rocketmq-5.3.2/bin/mqproxy -pc /home/rocketmq/conf/proxy.conf
+          ports:
+            - containerPort: 10911
+              name: proxy
+            - containerPort: 8081
+              name: http
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+            limits:
+              cpu: "0.2"
+              memory: 2Gi
+          volumeMounts:
+            - name: proxy-config
+              mountPath: /home/rocketmq/conf/proxy.conf
+              subPath: proxy.conf
+      volumes:
+        - name: proxy-config
+          configMap:
+            name: rocketmq-proxy-idn-tr-conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rocketmq-proxy-idn-tr
+  namespace: test-acp
+  labels:
+    app: rocketmq-proxy-idn-tr
+    component: proxy
+spec:
+  selector:
+    app: rocketmq-proxy-idn-tr
+  ports:
+    - name: proxy
+      port: 10911
+      targetPort: 10911
+    - name: http
+      port: 8081
+      targetPort: 8081

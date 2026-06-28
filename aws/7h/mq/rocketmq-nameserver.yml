@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rocketmq-nameserver
+  namespace: test-acp
+  labels:
+    app: rocketmq
+    component: nameserver
+spec:
+  # 单节点/集群两种模式切换说明：
+  # 单节点模式：使用普通 ClusterIP，`kubectl get svc` 会显示实际 IP。
+  # 集群模式：改回 headless Service（clusterIP: None + publishNotReadyAddresses: true）。
+  ports:
+    - port: 9876
+      targetPort: 9876
+      name: namesrv
+  selector:
+    app: rocketmq
+    component: nameserver
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rocketmq-nameserver
+  namespace: test-acp
+  labels:
+    app: rocketmq
+    component: nameserver
+spec:
+  serviceName: rocketmq-nameserver
+  # 当前为单节点；后续如需多副本，可按需提高 replicas。
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rocketmq
+      component: nameserver
+  template:
+    metadata:
+      labels:
+        app: rocketmq
+        component: nameserver
+    spec:
+      containers:
+        - name: nameserver
+          image: apache/rocketmq:5.3.2
+          command: ["sh", "mqnamesrv"]
+          ports:
+            - containerPort: 9876
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+            limits:
+              cpu: "0.2"
+              memory: 2Gi

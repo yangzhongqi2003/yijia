@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rocketmq-dashboard
+  namespace: test-acp
+  labels:
+    app: rocketmq-dashboard
+    component: dashboard
+spec:
+  # 当前为单节点；后续如需多副本，可按需提高 replicas。
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rocketmq-dashboard
+  template:
+    metadata:
+      labels:
+        app: rocketmq-dashboard
+        component: dashboard
+    spec:
+      containers:
+        - name: dashboard
+          image: apacherocketmq/rocketmq-dashboard:2.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          env:
+            - name: JAVA_OPTS
+              value: "-Drocketmq.namesrv.addr=rocketmq-nameserver:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false"
+            - name: LOGIN_USERNAME
+              value: "admin"
+            - name: LOGIN_PASSWORD
+              value: "k6ROkqOk0w2q1ash"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+            limits:
+              cpu: "0.2"
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rocketmq-dashboard
+  namespace: test-acp
+  labels:
+    app: rocketmq-dashboard
+    component: dashboard
+spec:
+  type: NodePort
+  ports:
+    - port: 8082
+      targetPort: 8082
+      protocol: TCP
+      name: http
+  selector:
+    app: rocketmq-dashboard

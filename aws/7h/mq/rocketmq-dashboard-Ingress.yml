@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rocketmq-dashboard-ingress
+  namespace: test-acp
+  labels:
+    app: rocketmq-dashboard
+    component: ingress
+  annotations:
+    cert-manager.io/cluster-issuer: prod-issuer
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+    nginx.ingress.kubernetes.io/proxy-body-size: '4G'
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: test-acp-rocketmq-idn-tr.transafe.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rocketmq-dashboard
+                port:
+                  number: 8082
+  tls:
+    - hosts:
+        - test-acp-rocketmq-idn-tr.transafe.co
+      secretName: test-acp-rocketmq-dashboard-ingress-tls
